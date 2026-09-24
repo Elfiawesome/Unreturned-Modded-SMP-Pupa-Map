@@ -18,6 +18,36 @@
         <link rel="icon" href="./assets/favicon-DEN7TZ5X.png">
         <link rel="manifest" href="./assets/manifest-vz4Wm4Dd.webmanifest">
         <title>BlueMap</title>
+        <script>
+            (function () {
+                var RAW_BASE = "https://raw.githubusercontent.com/Elfiawesome/Unreturned-Modded-SMP-Pupa-Map/main/";
+                var isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/i.test(location.hostname);
+                if (isLocal || !/^https?:$/.test(location.protocol)) return;
+
+                var pageBase = location.origin + location.pathname.replace(/[^/]*$/, "");
+
+                function reroute(url) {
+                    if (url.indexOf(pageBase) !== 0) return null;
+                    var rest = url.slice(pageBase.length);
+                    if (rest === "" || rest.indexOf("assets/") === 0) return null;
+                    return RAW_BASE + rest;
+                }
+
+                var nativeFetch = window.fetch.bind(window);
+                window.fetch = function (input, init) {
+                    try {
+                        if (typeof input === "string" || input instanceof URL) {
+                            var mapped = reroute(new URL(String(input), location.href).href);
+                            if (mapped) input = mapped;
+                        } else if (input instanceof Request) {
+                            var mappedRequest = reroute(input.url);
+                            if (mappedRequest) input = new Request(mappedRequest, input);
+                        }
+                    } catch (e) {}
+                    return nativeFetch(input, init);
+                };
+            })();
+        </script>
       <script type="module" crossorigin src="./assets/index-DJzYl7wx.js"></script>
       <link rel="stylesheet" crossorigin href="./assets/index-C6zAnFcX.css">
     </head>
